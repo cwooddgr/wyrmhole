@@ -1,0 +1,405 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		47CBD2ED1E3645581EC5EC1E /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 29DFF98893FB221E897EF237 /* WebRTC */; };
+		7A85BC99350537BCEB4BBB1D /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F795CB946DE8EE5097275935 /* DiscoveryView.swift */; };
+		816C204F9A45BADF6D19B190 /* WebRTCService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 268EDCCE26249DA8EA5AF481 /* WebRTCService.swift */; };
+		8A91B8777E44A9182BACC491 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DB374073B87FA4EB80EAB1F /* Peer.swift */; };
+		A59577CE44F4C19664FEFFE7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1F3F72D0357D951FBC728808 /* Assets.xcassets */; };
+		B68079818D6ECEB3F28F4EDD /* WyrmholeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446BF8427B0FACCDDC3C8B5D /* WyrmholeApp.swift */; };
+		B8795D58D3028BF624D77E59 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A3F2F7F9B91DE61A15A27D /* ContentView.swift */; };
+		D124CFFF3F7C0AF73F96B91D /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C077F49DDA74192ED831DA /* ConnectionManager.swift */; };
+		DFBA160CA6347B69C8A2E704 /* PortalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42DB811AC8460629442A0F4E /* PortalView.swift */; };
+		E7C14756118D82CA21AAA4A8 /* BonjourService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EDECF2CD11E8AB4F18F349D /* BonjourService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1F3F72D0357D951FBC728808 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		268EDCCE26249DA8EA5AF481 /* WebRTCService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCService.swift; sourceTree = "<group>"; };
+		35C077F49DDA74192ED831DA /* ConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionManager.swift; sourceTree = "<group>"; };
+		42DB811AC8460629442A0F4E /* PortalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalView.swift; sourceTree = "<group>"; };
+		446BF8427B0FACCDDC3C8B5D /* WyrmholeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WyrmholeApp.swift; sourceTree = "<group>"; };
+		4DB374073B87FA4EB80EAB1F /* Peer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
+		5EDECF2CD11E8AB4F18F349D /* BonjourService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourService.swift; sourceTree = "<group>"; };
+		81A3F2F7F9B91DE61A15A27D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		8DCE36BBA86928129CF15E0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A780BDEDF70ABE814F02F752 /* Wyrmhole.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Wyrmhole.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2F840A3FBA48F2E01F18160 /* Wyrmhole.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Wyrmhole.entitlements; sourceTree = "<group>"; };
+		F795CB946DE8EE5097275935 /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B70E0EB2805544A7AC355549 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				47CBD2ED1E3645581EC5EC1E /* WebRTC in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		069AEC7979F4A214CFCB752F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				81A3F2F7F9B91DE61A15A27D /* ContentView.swift */,
+				F795CB946DE8EE5097275935 /* DiscoveryView.swift */,
+				42DB811AC8460629442A0F4E /* PortalView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		30F9A0155F7F72F8485221BD = {
+			isa = PBXGroup;
+			children = (
+				F99E163A7A7053DD658550F5 /* Wyrmhole */,
+				DD976AC3758587544973F3B6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		66A0EC340CAE2EFBBD370F4D /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				4DB374073B87FA4EB80EAB1F /* Peer.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		DD976AC3758587544973F3B6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A780BDEDF70ABE814F02F752 /* Wyrmhole.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F35E646BEE40FF035D3D4CDD /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				5EDECF2CD11E8AB4F18F349D /* BonjourService.swift */,
+				35C077F49DDA74192ED831DA /* ConnectionManager.swift */,
+				268EDCCE26249DA8EA5AF481 /* WebRTCService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		F99E163A7A7053DD658550F5 /* Wyrmhole */ = {
+			isa = PBXGroup;
+			children = (
+				1F3F72D0357D951FBC728808 /* Assets.xcassets */,
+				8DCE36BBA86928129CF15E0E /* Info.plist */,
+				F2F840A3FBA48F2E01F18160 /* Wyrmhole.entitlements */,
+				446BF8427B0FACCDDC3C8B5D /* WyrmholeApp.swift */,
+				66A0EC340CAE2EFBBD370F4D /* Models */,
+				F35E646BEE40FF035D3D4CDD /* Services */,
+				069AEC7979F4A214CFCB752F /* Views */,
+			);
+			path = Wyrmhole;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E227985C02A728E599DE22E4 /* Wyrmhole */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3B579EA4E6627810934574B7 /* Build configuration list for PBXNativeTarget "Wyrmhole" */;
+			buildPhases = (
+				F35D16187F88DF1F0A1DA518 /* Sources */,
+				CFBCB9D464F9B6B0D03AEAFE /* Resources */,
+				B70E0EB2805544A7AC355549 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Wyrmhole;
+			packageProductDependencies = (
+				29DFF98893FB221E897EF237 /* WebRTC */,
+			);
+			productName = Wyrmhole;
+			productReference = A780BDEDF70ABE814F02F752 /* Wyrmhole.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		922A11E721A4CB70D5916A0B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					E227985C02A728E599DE22E4 = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = E39543D833B9C5A8CA20CC1F /* Build configuration list for PBXProject "Wyrmhole" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 30F9A0155F7F72F8485221BD;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B623E88DFA66DCA153D3B5CD /* XCRemoteSwiftPackageReference "WebRTC" */,
+			);
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E227985C02A728E599DE22E4 /* Wyrmhole */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CFBCB9D464F9B6B0D03AEAFE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A59577CE44F4C19664FEFFE7 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F35D16187F88DF1F0A1DA518 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E7C14756118D82CA21AAA4A8 /* BonjourService.swift in Sources */,
+				D124CFFF3F7C0AF73F96B91D /* ConnectionManager.swift in Sources */,
+				B8795D58D3028BF624D77E59 /* ContentView.swift in Sources */,
+				7A85BC99350537BCEB4BBB1D /* DiscoveryView.swift in Sources */,
+				8A91B8777E44A9182BACC491 /* Peer.swift in Sources */,
+				DFBA160CA6347B69C8A2E704 /* PortalView.swift in Sources */,
+				816C204F9A45BADF6D19B190 /* WebRTCService.swift in Sources */,
+				B68079818D6ECEB3F28F4EDD /* WyrmholeApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		062F06030F825E733FBF0398 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Release;
+		};
+		3617A4DC9405BF18802D3563 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		7D26F74315C095367BD648FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Wyrmhole/Wyrmhole.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B2LPLN73D4;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Wyrmhole/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wyrmhole.app;
+				PRODUCT_NAME = Wyrmhole;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A6B7DCF6F8401B29A004F3D3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Wyrmhole/Wyrmhole.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = B2LPLN73D4;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Wyrmhole/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.wyrmhole.app;
+				PRODUCT_NAME = Wyrmhole;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3B579EA4E6627810934574B7 /* Build configuration list for PBXNativeTarget "Wyrmhole" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A6B7DCF6F8401B29A004F3D3 /* Debug */,
+				7D26F74315C095367BD648FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E39543D833B9C5A8CA20CC1F /* Build configuration list for PBXProject "Wyrmhole" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3617A4DC9405BF18802D3563 /* Debug */,
+				062F06030F825E733FBF0398 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B623E88DFA66DCA153D3B5CD /* XCRemoteSwiftPackageReference "WebRTC" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stasel/WebRTC.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 125.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		29DFF98893FB221E897EF237 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B623E88DFA66DCA153D3B5CD /* XCRemoteSwiftPackageReference "WebRTC" */;
+			productName = WebRTC;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 922A11E721A4CB70D5916A0B /* Project object */;
+}
