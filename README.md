@@ -1,6 +1,6 @@
 # Wyrmhole
 
-![Wyrmhole](assets/wyrmhole-hero.png)
+![Wyrmhole](assets/wyrmhole-hero_bw.png)
 
 A local network video portal between two iPads. Creates a persistent, full-screen video/audio connection that acts like a window between two rooms.
 
@@ -73,4 +73,6 @@ The app requires:
 
 ## License
 
-MIT License - Copyright (c) 2026 DGR Labs, LLC
+MIT License
+
+&copy; 2026 DGR Labs, LLC
