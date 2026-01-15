@@ -73,4 +73,4 @@ The app requires:
 
 ## License
 
-MIT
+MIT License - Copyright (c) 2026 DGR Labs, LLC
