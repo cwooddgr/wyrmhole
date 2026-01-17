@@ -38,6 +38,40 @@ struct PortalView: View {
                 if showControls {
                     controlsOverlay
                 }
+
+                // Persistent mute indicator (only when controls are hidden)
+                if connectionManager.isAudioMuted && !showControls {
+                    VStack {
+                        HStack {
+                            Image(systemName: "mic.slash.fill")
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(8)
+                                .background(Color.red.opacity(0.8))
+                                .clipShape(Circle())
+                            Spacer()
+                        }
+                        .padding()
+                        Spacer()
+                    }
+                }
+
+                // Persistent peer name at bottom (always visible)
+                if let peer = connectionManager.connectedPeer {
+                    VStack {
+                        Spacer()
+                        Text(peer.name)
+                            .font(.title3.weight(.medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(
+                                Capsule()
+                                    .fill(Color.black.opacity(0.5))
+                            )
+                            .padding(.bottom, 40)
+                    }
+                }
             }
         }
         .persistentSystemOverlays(.hidden)
@@ -57,12 +91,15 @@ struct PortalView: View {
 
     private var controlsOverlay: some View {
         VStack {
-            // Top bar with connection info
+            // Top bar with mute indicator and signal strength
             HStack {
-                if let peer = connectionManager.connectedPeer {
-                    Label(peer.name, systemImage: "ipad")
-                        .font(.headline)
+                if connectionManager.isAudioMuted {
+                    Image(systemName: "mic.slash.fill")
+                        .font(.caption)
                         .foregroundColor(.white)
+                        .padding(8)
+                        .background(Color.red.opacity(0.8))
+                        .clipShape(Circle())
                 }
                 Spacer()
                 connectionQualityIndicator
@@ -78,9 +115,23 @@ struct PortalView: View {
 
             Spacer()
 
-            // Bottom bar with disconnect button
-            HStack {
+            // Bottom bar with controls
+            HStack(spacing: 24) {
                 Spacer()
+
+                // Mute button
+                Button {
+                    connectionManager.toggleMute()
+                } label: {
+                    Image(systemName: connectionManager.isAudioMuted ? "mic.slash" : "mic")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(connectionManager.isAudioMuted ? Color.orange : Color.gray.opacity(0.6))
+                        .clipShape(Circle())
+                }
+
+                // End button
                 Button {
                     connectionManager.disconnect()
                 } label: {
@@ -91,6 +142,7 @@ struct PortalView: View {
                         .background(Color.red)
                         .clipShape(Capsule())
                 }
+
                 Spacer()
             }
             .padding()

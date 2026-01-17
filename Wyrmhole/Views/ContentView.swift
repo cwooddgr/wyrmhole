@@ -18,6 +18,24 @@ struct ContentView: View {
         .alert("Wyrmhole closed", isPresented: $connectionManager.remoteDisconnectReceived) {
             Button("OK", role: .cancel) { }
         }
+        .onChange(of: connectionManager.state) { newState in
+            // Start browsing/advertising when not connected, stop when connected
+            if newState == .connected {
+                connectionManager.stopBrowsing()
+                connectionManager.stopAdvertising()
+            } else if newState == .disconnected || newState == .browsing {
+                // Restart browsing/advertising if we're back to discovery state
+                connectionManager.startBrowsing()
+                connectionManager.startAdvertising()
+            }
+        }
+        .onAppear {
+            // Start browsing/advertising when app appears (if not connected)
+            if connectionManager.state != .connected {
+                connectionManager.startBrowsing()
+                connectionManager.startAdvertising()
+            }
+        }
     }
 }
 

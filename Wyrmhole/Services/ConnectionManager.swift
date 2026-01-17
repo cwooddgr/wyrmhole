@@ -33,6 +33,7 @@ final class ConnectionManager: ObservableObject {
     @Published private(set) var connectedPeer: Peer?
     @Published private(set) var signalStrength: Int = 3 // 0-3
     @Published var remoteDisconnectReceived = false
+    @Published private(set) var isAudioMuted: Bool = false
 
     // MARK: - Public Properties
 
@@ -123,6 +124,12 @@ final class ConnectionManager: ObservableObject {
         connectedPeer = nil
     }
 
+    /// Toggle microphone mute
+    func toggleMute() {
+        webRTCService?.toggleAudio()
+        isAudioMuted.toggle()
+    }
+
     // MARK: - Private Methods
 
     private func setupBindings() {
@@ -152,15 +159,8 @@ final class ConnectionManager: ObservableObject {
         state = .connecting
         wasInitiator = false
 
-        // Extract peer info from connection
-        let peerName: String
-        if case .service(let name, _, _, _) = connection.endpoint {
-            peerName = name
-        } else {
-            peerName = "Unknown Device"
-        }
-
-        let peer = Peer(name: peerName, endpoint: connection.endpoint)
+        // Create peer with placeholder name - will be updated when we receive hello message
+        let peer = Peer(name: "Connecting...", endpoint: connection.endpoint)
         connectedPeer = peer
         lastConnectedPeer = peer
         reconnectAttempts = 0
@@ -182,6 +182,8 @@ final class ConnectionManager: ObservableObject {
         switch connectionState {
         case .ready:
             print("Signaling connection ready")
+            // Send our display name to the peer
+            sendSignalingMessage(.hello(displayName))
             // Set up WebRTC first so it's ready to handle incoming messages
             setupWebRTC(isInitiator: isInitiator)
             // Then start receiving signaling messages
@@ -289,6 +291,7 @@ final class ConnectionManager: ObservableObject {
     // MARK: - Signaling Protocol
 
     private enum SignalingMessage: Codable {
+        case hello(String)  // Exchange display names
         case sdp(RTCSessionDescriptionWrapper)
         case iceCandidate(RTCIceCandidateWrapper)
         case disconnect
@@ -380,6 +383,12 @@ final class ConnectionManager: ObservableObject {
             let message = try JSONDecoder().decode(SignalingMessage.self, from: data)
 
             switch message {
+            case .hello(let peerName):
+                // Update the connected peer's name
+                if let currentPeer = connectedPeer {
+                    connectedPeer = Peer(id: currentPeer.id, name: peerName, endpoint: currentPeer.endpoint)
+                }
+
             case .sdp(let wrapper):
                 let sdp = wrapper.toRTCSessionDescription()
                 if sdp.type == .offer {

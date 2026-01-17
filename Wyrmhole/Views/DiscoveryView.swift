@@ -20,6 +20,7 @@ struct DiscoveryView: View {
                     HStack(spacing: 8) {
                         Text(connectionManager.displayName)
                             .foregroundColor(.secondary)
+                            .padding(.leading, 8)
                         Button {
                             editedName = connectionManager.displayName
                             isEditingName = true
@@ -61,18 +62,11 @@ struct DiscoveryView: View {
                 .presentationDetents([.medium])
             }
             .onAppear {
-                connectionManager.startBrowsing()
-                connectionManager.startAdvertising()
-
                 // Show name dialog on first launch
                 if connectionManager.isFirstLaunch {
                     editedName = connectionManager.displayName
                     isEditingName = true
                 }
-            }
-            .onDisappear {
-                connectionManager.stopBrowsing()
-                connectionManager.stopAdvertising()
             }
         }
     }
