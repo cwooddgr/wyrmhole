@@ -80,9 +80,7 @@ final class WebRTCService: NSObject, ObservableObject {
     }
 
     private func setupOrientationObserver() {
-        // Start generating orientation notifications
-        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
-
+        // Note: beginGeneratingDeviceOrientationNotifications is called in WyrmholeApp.init
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleOrientationChange),
