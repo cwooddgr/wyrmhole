@@ -31,9 +31,23 @@ final class BonjourService: ObservableObject {
     // Callbacks for incoming connections
     var onIncomingConnection: ((NWConnection) -> Void)?
 
-    // Device name for advertising
-    private var deviceName: String {
-        UIDevice.current.name
+    // User-configurable display name key
+    private static let displayNameKey = "WyrmholeDisplayName"
+
+    // Display name for advertising (user-configurable, falls back to device model)
+    var displayName: String {
+        get {
+            UserDefaults.standard.string(forKey: Self.displayNameKey) ?? UIDevice.current.name
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Self.displayNameKey)
+            objectWillChange.send()
+            // Restart advertising if active to use the new name
+            if listener != nil {
+                stopAdvertising()
+                startAdvertising()
+            }
+        }
     }
 
     // MARK: - Initialization
@@ -94,10 +108,12 @@ final class BonjourService: ObservableObject {
 
             let listener = try NWListener(using: parameters)
 
-            // Advertise via Bonjour
+            // Advertise via Bonjour with device name in TXT record
+            let txtRecord = NWTXTRecord(["displayName": displayName])
             listener.service = NWListener.Service(
-                name: deviceName,
-                type: Self.serviceType
+                name: displayName,
+                type: Self.serviceType,
+                txtRecord: txtRecord
             )
 
             listener.stateUpdateHandler = { [weak self] state in
@@ -172,11 +188,19 @@ final class BonjourService: ObservableObject {
             }
 
             // Skip our own service
-            if name == deviceName && listener != nil {
+            if name == displayName && listener != nil {
                 return nil
             }
 
-            return Peer(name: name, endpoint: result.endpoint)
+            // Get device name from TXT record if available, otherwise use service name
+            var peerName = name
+            if case .bonjour(let txtRecord) = result.metadata,
+               let nameEntry = txtRecord.getEntry(for: "displayName"),
+               case .string(let nameValue) = nameEntry {
+                peerName = nameValue
+            }
+
+            return Peer(name: peerName, endpoint: result.endpoint)
         }
     }
 

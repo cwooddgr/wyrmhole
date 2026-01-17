@@ -32,10 +32,17 @@ final class ConnectionManager: ObservableObject {
     @Published private(set) var discoveredPeers: [Peer] = []
     @Published private(set) var connectedPeer: Peer?
     @Published private(set) var signalStrength: Int = 3 // 0-3
+    @Published var remoteDisconnectReceived = false
 
     // MARK: - Public Properties
 
     private(set) var webRTCService: WebRTCService?
+
+    /// The display name shown to other devices
+    var displayName: String {
+        get { bonjourService.displayName }
+        set { bonjourService.displayName = newValue }
+    }
 
     // MARK: - Private Properties
 
@@ -47,6 +54,7 @@ final class ConnectionManager: ObservableObject {
     private let maxReconnectAttempts = 5
     private var reconnectWorkItem: DispatchWorkItem?
     private var lastConnectedPeer: Peer?
+    private var wasInitiator = false
 
     // MARK: - Initialization
 
@@ -85,6 +93,7 @@ final class ConnectionManager: ObservableObject {
         state = .connecting
         lastConnectedPeer = peer
         reconnectAttempts = 0
+        wasInitiator = true
 
         // Create signaling connection
         let connection = bonjourService.connect(to: peer)
@@ -100,6 +109,9 @@ final class ConnectionManager: ObservableObject {
         reconnectWorkItem?.cancel()
         reconnectWorkItem = nil
         reconnectAttempts = maxReconnectAttempts // Prevent auto-reconnect
+
+        // Notify the other peer of graceful disconnect before closing
+        sendSignalingMessage(.disconnect)
 
         cleanupConnection()
         state = .disconnected
@@ -130,6 +142,7 @@ final class ConnectionManager: ObservableObject {
         }
 
         state = .connecting
+        wasInitiator = false
 
         // Extract peer info from connection
         let peerName: String
@@ -155,16 +168,18 @@ final class ConnectionManager: ObservableObject {
                 self?.handleConnectionStateChange(state, isInitiator: isInitiator)
             }
         }
-
-        // Start receiving signaling messages
-        receiveSignalingMessage(from: connection)
     }
 
     private func handleConnectionStateChange(_ connectionState: NWConnection.State, isInitiator: Bool) {
         switch connectionState {
         case .ready:
             print("Signaling connection ready")
+            // Set up WebRTC first so it's ready to handle incoming messages
             setupWebRTC(isInitiator: isInitiator)
+            // Then start receiving signaling messages
+            if let connection = signalingConnection {
+                receiveSignalingMessage(from: connection)
+            }
 
         case .failed(let error):
             print("Signaling connection failed: \(error)")
@@ -221,7 +236,18 @@ final class ConnectionManager: ObservableObject {
     }
 
     private func handleConnectionFailure() {
+        // Only the initiator should attempt to reconnect
+        // The non-initiator should wait for a new incoming connection
+        guard wasInitiator else {
+            print("Connection failed (non-initiator), returning to disconnected state")
+            cleanupConnection()
+            state = .disconnected
+            connectedPeer = nil
+            return
+        }
+
         guard reconnectAttempts < maxReconnectAttempts else {
+            print("Max reconnection attempts reached, giving up")
             cleanupConnection()
             state = .disconnected
             connectedPeer = nil
@@ -257,6 +283,7 @@ final class ConnectionManager: ObservableObject {
     private enum SignalingMessage: Codable {
         case sdp(RTCSessionDescriptionWrapper)
         case iceCandidate(RTCIceCandidateWrapper)
+        case disconnect
 
         static func sdp(_ sdp: RTCSessionDescription) -> SignalingMessage {
             .sdp(RTCSessionDescriptionWrapper(sdp))
@@ -285,17 +312,29 @@ final class ConnectionManager: ObservableObject {
     }
 
     private func receiveSignalingMessage(from connection: NWConnection) {
+        // Don't receive if connection is no longer active
+        guard connection.state == .ready else {
+            print("Connection not ready, stopping receive loop")
+            return
+        }
+
         // First, read the length prefix (4 bytes)
         connection.receive(minimumIncompleteLength: 4, maximumLength: 4) { [weak self] data, _, isComplete, error in
             guard let self = self else { return }
 
             if let error = error {
                 print("Error receiving message length: \(error)")
+                // Only stop if connection is no longer valid
+                if connection.state != .ready {
+                    return
+                }
+                // Otherwise continue trying to receive
+                self.receiveSignalingMessage(from: connection)
                 return
             }
 
             guard let lengthData = data, lengthData.count == 4 else {
-                if !isComplete {
+                if !isComplete && connection.state == .ready {
                     self.receiveSignalingMessage(from: connection)
                 }
                 return
@@ -307,6 +346,10 @@ final class ConnectionManager: ObservableObject {
             connection.receive(minimumIncompleteLength: Int(length), maximumLength: Int(length)) { data, _, _, error in
                 if let error = error {
                     print("Error receiving message body: \(error)")
+                    // Continue receiving if connection is still valid
+                    if connection.state == .ready {
+                        self.receiveSignalingMessage(from: connection)
+                    }
                     return
                 }
 
@@ -317,7 +360,9 @@ final class ConnectionManager: ObservableObject {
                 }
 
                 // Continue receiving
-                self.receiveSignalingMessage(from: connection)
+                if connection.state == .ready {
+                    self.receiveSignalingMessage(from: connection)
+                }
             }
         }
     }
@@ -338,6 +383,17 @@ final class ConnectionManager: ObservableObject {
             case .iceCandidate(let wrapper):
                 let candidate = wrapper.toRTCIceCandidate()
                 webRTCService?.addIceCandidate(candidate)
+
+            case .disconnect:
+                // Remote peer disconnected gracefully - don't attempt reconnection
+                print("Remote peer disconnected gracefully")
+                reconnectWorkItem?.cancel()
+                reconnectWorkItem = nil
+                reconnectAttempts = maxReconnectAttempts
+                cleanupConnection()
+                state = .disconnected
+                connectedPeer = nil
+                remoteDisconnectReceived = true
             }
         } catch {
             print("Failed to decode signaling message: \(error)")

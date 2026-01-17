@@ -15,6 +15,9 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(.dark)
+        .alert("Wyrmhole closed", isPresented: $connectionManager.remoteDisconnectReceived) {
+            Button("OK", role: .cancel) { }
+        }
     }
 }
 
@@ -26,7 +29,7 @@ struct ConnectingView: View {
             ProgressView()
                 .scaleEffect(2)
 
-            Text("Connecting...")
+            Text("Opening Wyrmhole...")
                 .font(.title2)
                 .foregroundColor(.secondary)
 
