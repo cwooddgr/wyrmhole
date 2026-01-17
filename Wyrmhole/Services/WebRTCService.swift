@@ -280,7 +280,8 @@ final class WebRTCService: NSObject, ObservableObject {
         view.subviews.forEach { $0.removeFromSuperview() }
 
         let renderer = RTCMTLVideoView(frame: view.bounds)
-        renderer.videoContentMode = .scaleAspectFill
+        // Use aspectFit to show full video when remote device is in different orientation
+        renderer.videoContentMode = .scaleAspectFit
         renderer.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(renderer)
 
