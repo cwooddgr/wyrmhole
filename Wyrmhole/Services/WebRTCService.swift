@@ -97,50 +97,35 @@ final class WebRTCService: NSObject, ObservableObject {
     }
 
     private func updateVideoOrientation() {
-        guard let videoSource = videoSource else { return }
-
-        let orientation = currentVideoOrientation()
-        let isLandscape = orientation == .landscapeLeft || orientation == .landscapeRight
-
-        // Adapt the video source output format based on orientation
-        // The camera captures at 1280x720, but we need to tell WebRTC the orientation
-        if isLandscape {
-            videoSource.adaptOutputFormat(toWidth: 1280, height: 720, fps: 30)
-        } else {
-            videoSource.adaptOutputFormat(toWidth: 720, height: 1280, fps: 30)
-        }
+        // Restart capture to pick up new orientation
+        restartCaptureIfNeeded()
     }
 
-    private func currentVideoOrientation() -> AVCaptureVideoOrientation {
-        // Try to get orientation from the window scene first (more reliable on first launch)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            switch windowScene.interfaceOrientation {
-            case .portrait:
-                return .portrait
-            case .portraitUpsideDown:
-                return .portraitUpsideDown
-            case .landscapeLeft:
-                return .landscapeLeft
-            case .landscapeRight:
-                return .landscapeRight
-            default:
-                break
-            }
-        }
+    private func restartCaptureIfNeeded() {
+        guard let capturer = videoCapturer else { return }
 
-        // Fallback to device orientation
-        switch UIDevice.current.orientation {
-        case .portrait:
-            return .portrait
-        case .portraitUpsideDown:
-            return .portraitUpsideDown
-        case .landscapeLeft:
-            return .landscapeRight // Note: inverted for front camera
-        case .landscapeRight:
-            return .landscapeLeft // Note: inverted for front camera
-        default:
-            return .portrait
-        }
+        // Find the front camera
+        guard let frontCamera = RTCCameraVideoCapturer.captureDevices().first(where: {
+            $0.position == .front
+        }) else { return }
+
+        // Find the format we were using
+        let formats = RTCCameraVideoCapturer.supportedFormats(for: frontCamera)
+        guard let format = formats.first(where: { format in
+            let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
+            return dimensions.width == 1280 && dimensions.height == 720
+        }) ?? formats.last else { return }
+
+        let fps = min(format.videoSupportedFrameRateRanges.first?.maxFrameRate ?? 30, 30)
+
+        // Stop and restart capture to pick up current orientation
+        capturer.stopCapture()
+        capturer.startCapture(with: frontCamera, format: format, fps: Int(fps))
+    }
+
+    private func isScreenLandscape() -> Bool {
+        let bounds = UIScreen.main.bounds
+        return bounds.width > bounds.height
     }
 
     // MARK: - Public Methods
@@ -378,9 +363,10 @@ final class WebRTCService: NSObject, ObservableObject {
 
         capturer.startCapture(with: frontCamera, format: format, fps: Int(fps))
 
-        // Apply initial orientation after a brief delay to ensure UI is ready
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-            self?.updateVideoOrientation()
+        // Restart capture after a delay to ensure correct orientation on first launch
+        // The device orientation system may not be fully initialized immediately
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.restartCaptureIfNeeded()
         }
         #endif
 
