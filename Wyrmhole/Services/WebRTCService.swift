@@ -8,11 +8,9 @@ final class WebRTCService: NSObject, ObservableObject {
     // MARK: - Types
 
     struct Configuration {
-        // For local network, we don't need STUN/TURN servers
-        // but we include Google's public STUN server as a fallback
-        static let iceServers: [RTCIceServer] = [
-            RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"])
-        ]
+        // For local network connections, we don't need STUN/TURN servers
+        // Removing them avoids delays from STUN server timeouts on some iOS versions
+        static let iceServers: [RTCIceServer] = []
 
         static let mediaConstraints = RTCMediaConstraints(
             mandatoryConstraints: nil,

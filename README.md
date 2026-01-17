@@ -33,12 +33,16 @@ Then in Xcode:
 ## Usage
 
 1. Launch Wyrmhole on both iPads
-2. On one device, tap the eye icon (or "Make this device visible") to advertise
-3. The other device will see it appear in the list
-4. Tap to connect
+2. Set your display name (prompted on first launch, or tap the pencil icon)
+3. Devices automatically discover each other on the local network
+4. Tap a device to connect
 5. Full-screen video portal opens automatically
 
-Tap anywhere on the portal view to show controls, including the disconnect button.
+Tap anywhere on the portal view to show controls:
+- **Mute** - Toggle your microphone on/off
+- **End** - Disconnect from the portal
+
+When muted, a persistent indicator appears in the corner even when controls are hidden.
 
 ## Architecture
 
@@ -60,7 +64,7 @@ Wyrmhole/
 ## How It Works
 
 - **Discovery**: Uses Bonjour (Network.framework) to advertise and discover nearby Wyrmhole devices on the local network
-- **Signaling**: WebRTC offer/answer and ICE candidates are exchanged over a direct TCP connection established via Bonjour
+- **Signaling**: WebRTC offer/answer and ICE candidates are exchanged over a direct TCP connection established via Bonjour. Connections use WiFi for reliability across iOS versions.
 - **Media**: WebRTC handles video/audio capture, encoding, and low-latency peer-to-peer streaming
 - **Reconnection**: Automatic reconnect with exponential backoff if the connection drops
 

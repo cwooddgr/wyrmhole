@@ -106,10 +106,10 @@ final class BonjourService: ObservableObject {
 
         do {
             let parameters = NWParameters.tcp
-            parameters.includePeerToPeer = true
-
-            // Add TLS for security (optional, can be removed for simplicity)
-            // parameters.defaultProtocolStack.applicationProtocols.insert(NWProtocolTLS.Options(), at: 0)
+            // Note: We intentionally do NOT set includePeerToPeer on the listener
+            // This forces incoming connections over WiFi instead of AWDL, which is
+            // more reliable between different iOS versions. Discovery still uses
+            // peer-to-peer via the browser, but actual connections go over WiFi.
 
             let listener = try NWListener(using: parameters)
 
@@ -155,7 +155,10 @@ final class BonjourService: ObservableObject {
     /// Connect to a discovered peer
     func connect(to peer: Peer) -> NWConnection {
         let parameters = NWParameters.tcp
-        parameters.includePeerToPeer = true
+        // Note: We intentionally do NOT set includePeerToPeer on connections
+        // This forces connections over WiFi instead of AWDL, which is more
+        // reliable between different iOS versions (especially iOS 16 to newer).
+        // Discovery still uses peer-to-peer via the browser.
 
         let connection = NWConnection(to: peer.endpoint, using: parameters)
         return connection

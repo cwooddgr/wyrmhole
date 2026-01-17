@@ -61,6 +61,7 @@ final class ConnectionManager: ObservableObject {
     private var reconnectWorkItem: DispatchWorkItem?
     private var lastConnectedPeer: Peer?
     private var wasInitiator = false
+    private let connectionQueue = DispatchQueue(label: "com.wyrmhole.connection", qos: .userInitiated)
 
     // MARK: - Initialization
 
@@ -105,7 +106,7 @@ final class ConnectionManager: ObservableObject {
         let connection = bonjourService.connect(to: peer)
         setupSignalingConnection(connection, isInitiator: true)
         signalingConnection = connection
-        connection.start(queue: .main)
+        connection.start(queue: connectionQueue)
 
         connectedPeer = peer
     }
@@ -167,14 +168,37 @@ final class ConnectionManager: ObservableObject {
 
         setupSignalingConnection(connection, isInitiator: false)
         signalingConnection = connection
-        connection.start(queue: .main)
+        connection.start(queue: connectionQueue)
     }
 
+    private var connectionTimeoutItem: DispatchWorkItem?
+
     private func setupSignalingConnection(_ connection: NWConnection, isInitiator: Bool) {
+        // Set up connection timeout for stuck connections
+        connectionTimeoutItem?.cancel()
+        let timeoutItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            if self.signalingConnection?.state != .ready {
+                print("Connection timeout - connection stuck in preparing state")
+                DispatchQueue.main.async {
+                    self.handleConnectionFailure()
+                }
+            }
+        }
+        connectionTimeoutItem = timeoutItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10, execute: timeoutItem)
+
         connection.stateUpdateHandler = { [weak self] state in
-            Task { @MainActor in
+            print("Signaling connection state: \(state)")
+            DispatchQueue.main.async {
+                self?.connectionTimeoutItem?.cancel()
                 self?.handleConnectionStateChange(state, isInitiator: isInitiator)
             }
+        }
+
+        // Log path updates to debug interface selection
+        connection.pathUpdateHandler = { path in
+            print("Connection path update: \(path.status), interfaces: \(path.availableInterfaces.map { $0.name })")
         }
     }
 
@@ -193,6 +217,15 @@ final class ConnectionManager: ObservableObject {
 
         case .failed(let error):
             print("Signaling connection failed: \(error)")
+            // For non-initiator, if signaling fails before WebRTC is set up,
+            // we need to fully clean up since there's no retry mechanism
+            if !wasInitiator && webRTCService == nil {
+                print("Non-initiator signaling failed before WebRTC setup, cleaning up")
+                cleanupConnection()
+                state = .disconnected
+                connectedPeer = nil
+                return
+            }
             handleConnectionFailure()
 
         case .cancelled:
@@ -215,7 +248,8 @@ final class ConnectionManager: ObservableObject {
         }
 
         webRTC.onConnectionStateChanged = { [weak self] state in
-            Task { @MainActor in
+            print("WebRTC state changed: \(state)")
+            DispatchQueue.main.async {
                 self?.handleWebRTCStateChange(state)
             }
         }
@@ -247,12 +281,13 @@ final class ConnectionManager: ObservableObject {
 
     private func handleConnectionFailure() {
         // Only the initiator should attempt to reconnect
-        // The non-initiator should wait for a new incoming connection
+        // The non-initiator keeps signaling open and waits for initiator to retry
         guard wasInitiator else {
-            print("Connection failed (non-initiator), returning to disconnected state")
-            cleanupConnection()
-            state = .disconnected
-            connectedPeer = nil
+            print("Connection failed (non-initiator), keeping signaling open for initiator retry")
+            // Only clean up WebRTC, keep signaling connection open
+            webRTCService?.close()
+            webRTCService = nil
+            // Don't change state or close signaling - let initiator retry
             return
         }
 
@@ -267,14 +302,25 @@ final class ConnectionManager: ObservableObject {
         reconnectAttempts += 1
         print("Connection failed, attempting reconnect (\(reconnectAttempts)/\(maxReconnectAttempts))")
 
-        cleanupConnection()
+        // Only clean up WebRTC, keep signaling connection for retry
+        webRTCService?.close()
+        webRTCService = nil
 
-        // Exponential backoff for reconnect
+        // Exponential backoff for reconnect, then set up WebRTC again
         let delay = pow(2.0, Double(reconnectAttempts - 1))
         let workItem = DispatchWorkItem { [weak self] in
-            Task { @MainActor in
-                guard let self = self, let peer = self.lastConnectedPeer else { return }
-                self.connect(to: peer)
+            DispatchQueue.main.async {
+                guard let self = self, self.signalingConnection?.state == .ready else {
+                    // Signaling connection lost, do full reconnect
+                    self?.cleanupConnection()
+                    if let peer = self?.lastConnectedPeer {
+                        self?.connect(to: peer)
+                    }
+                    return
+                }
+                // Signaling still good, just retry WebRTC
+                print("Retrying WebRTC setup over existing signaling connection")
+                self.setupWebRTC(isInitiator: true)
             }
         }
         reconnectWorkItem = workItem
@@ -282,6 +328,8 @@ final class ConnectionManager: ObservableObject {
     }
 
     private func cleanupConnection() {
+        connectionTimeoutItem?.cancel()
+        connectionTimeoutItem = nil
         webRTCService?.close()
         webRTCService = nil
         signalingConnection?.cancel()
@@ -306,8 +354,12 @@ final class ConnectionManager: ObservableObject {
     }
 
     private func sendSignalingMessage(_ message: SignalingMessage) {
-        guard let connection = signalingConnection else { return }
+        guard let connection = signalingConnection else {
+            print("Cannot send signaling message - no connection")
+            return
+        }
 
+        print("Sending signaling message: \(message)")
         do {
             let data = try JSONEncoder().encode(message)
             let lengthData = withUnsafeBytes(of: UInt32(data.count).bigEndian) { Data($0) }
@@ -365,7 +417,7 @@ final class ConnectionManager: ObservableObject {
                 }
 
                 if let data = data {
-                    Task { @MainActor in
+                    DispatchQueue.main.async {
                         self.handleSignalingData(data)
                     }
                 }
@@ -381,19 +433,29 @@ final class ConnectionManager: ObservableObject {
     private func handleSignalingData(_ data: Data) {
         do {
             let message = try JSONDecoder().decode(SignalingMessage.self, from: data)
+            print("Received signaling message: \(message)")
 
             switch message {
             case .hello(let peerName):
                 // Update the connected peer's name
+                print("Received hello from: \(peerName)")
                 if let currentPeer = connectedPeer {
                     connectedPeer = Peer(id: currentPeer.id, name: peerName, endpoint: currentPeer.endpoint)
                 }
 
             case .sdp(let wrapper):
                 let sdp = wrapper.toRTCSessionDescription()
+                print("Received SDP type: \(sdp.type.rawValue) (0=offer, 1=pranswer, 2=answer)")
                 if sdp.type == .offer {
+                    // If we don't have a WebRTC service (e.g., after a retry), create one
+                    if webRTCService == nil {
+                        print("Received offer but no WebRTC service, creating new one (non-initiator)")
+                        setupWebRTC(isInitiator: false)
+                    }
+                    print("Handling offer with WebRTC service: \(webRTCService != nil)")
                     webRTCService?.handleOffer(sdp)
                 } else if sdp.type == .answer {
+                    print("Handling answer with WebRTC service: \(webRTCService != nil)")
                     webRTCService?.handleAnswer(sdp)
                 }
 
@@ -414,6 +476,9 @@ final class ConnectionManager: ObservableObject {
             }
         } catch {
             print("Failed to decode signaling message: \(error)")
+            if let str = String(data: data, encoding: .utf8) {
+                print("Raw message data: \(str)")
+            }
         }
     }
 }
