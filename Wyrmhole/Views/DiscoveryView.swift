@@ -2,7 +2,6 @@ import SwiftUI
 
 struct DiscoveryView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
-    @State private var isAdvertising = false
     @State private var isEditingName = false
     @State private var editedName = ""
 
@@ -18,21 +17,17 @@ struct DiscoveryView: View {
             .navigationTitle("Wyrmhole")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        if isAdvertising {
-                            isAdvertising = false
-                            connectionManager.stopAdvertising()
-                        } else {
+                    HStack(spacing: 8) {
+                        Text(connectionManager.displayName)
+                            .foregroundColor(.secondary)
+                        Button {
                             editedName = connectionManager.displayName
                             isEditingName = true
+                        } label: {
+                            Image(systemName: "pencil")
                         }
-                    } label: {
-                        Label(
-                            isAdvertising ? "Visible" : "Hidden",
-                            systemImage: isAdvertising ? "eye" : "eye.slash"
-                        )
+                        .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.bordered)
                 }
             }
             .sheet(isPresented: $isEditingName) {
@@ -59,8 +54,6 @@ struct DiscoveryView: View {
                                     connectionManager.displayName = trimmed
                                 }
                                 isEditingName = false
-                                isAdvertising = true
-                                connectionManager.startAdvertising()
                             }
                         }
                     }
@@ -69,6 +62,13 @@ struct DiscoveryView: View {
             }
             .onAppear {
                 connectionManager.startBrowsing()
+                connectionManager.startAdvertising()
+
+                // Show name dialog on first launch
+                if connectionManager.isFirstLaunch {
+                    editedName = connectionManager.displayName
+                    isEditingName = true
+                }
             }
             .onDisappear {
                 connectionManager.stopBrowsing()
@@ -86,19 +86,10 @@ struct DiscoveryView: View {
                 .font(.headline)
                 .foregroundColor(.secondary)
 
-            Text("Make sure another device is running Wyrmhole\nand is set to Visible")
+            Text("Make sure another device is running Wyrmhole")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
-
-            if !isAdvertising {
-                Button("Make this device visible") {
-                    editedName = connectionManager.displayName
-                    isEditingName = true
-                }
-                .buttonStyle(.borderedProminent)
-                .padding(.top, 8)
-            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.opacity(0.95))

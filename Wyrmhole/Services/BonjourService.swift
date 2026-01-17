@@ -34,6 +34,11 @@ final class BonjourService: ObservableObject {
     // User-configurable display name key
     private static let displayNameKey = "WyrmholeDisplayName"
 
+    /// Returns true if the user has never set a custom display name (first launch)
+    var isFirstLaunch: Bool {
+        UserDefaults.standard.string(forKey: Self.displayNameKey) == nil
+    }
+
     // Display name for advertising (user-configurable, falls back to device model)
     var displayName: String {
         get {

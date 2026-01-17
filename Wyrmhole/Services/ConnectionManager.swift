@@ -44,6 +44,11 @@ final class ConnectionManager: ObservableObject {
         set { bonjourService.displayName = newValue }
     }
 
+    /// Returns true if this is the first app launch (user hasn't set a display name)
+    var isFirstLaunch: Bool {
+        bonjourService.isFirstLaunch
+    }
+
     // MARK: - Private Properties
 
     private let bonjourService = BonjourService()
@@ -140,6 +145,9 @@ final class ConnectionManager: ObservableObject {
             connection.cancel()
             return
         }
+
+        // Dismiss any "Wyrmhole closed" dialog that may be showing
+        remoteDisconnectReceived = false
 
         state = .connecting
         wasInitiator = false
