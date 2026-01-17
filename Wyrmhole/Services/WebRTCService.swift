@@ -63,6 +63,7 @@ final class WebRTCService: NSObject, ObservableObject {
     private var videoCapturer: RTCCameraVideoCapturer?
     private var localVideoView: UIView?
     private var remoteVideoView: UIView?
+    private var videoSource: RTCVideoSource?
 
     private let rtcAudioSession = RTCAudioSession.sharedInstance()
 
@@ -71,6 +72,75 @@ final class WebRTCService: NSObject, ObservableObject {
     override init() {
         super.init()
         configureAudioSession()
+        setupOrientationObserver()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    private func setupOrientationObserver() {
+        // Start generating orientation notifications
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleOrientationChange),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleOrientationChange() {
+        // Update video orientation when device rotates
+        updateVideoOrientation()
+    }
+
+    private func updateVideoOrientation() {
+        guard let videoSource = videoSource else { return }
+
+        let orientation = currentVideoOrientation()
+        let isLandscape = orientation == .landscapeLeft || orientation == .landscapeRight
+
+        // Adapt the video source output format based on orientation
+        // The camera captures at 1280x720, but we need to tell WebRTC the orientation
+        if isLandscape {
+            videoSource.adaptOutputFormat(toWidth: 1280, height: 720, fps: 30)
+        } else {
+            videoSource.adaptOutputFormat(toWidth: 720, height: 1280, fps: 30)
+        }
+    }
+
+    private func currentVideoOrientation() -> AVCaptureVideoOrientation {
+        // Try to get orientation from the window scene first (more reliable on first launch)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            switch windowScene.interfaceOrientation {
+            case .portrait:
+                return .portrait
+            case .portraitUpsideDown:
+                return .portraitUpsideDown
+            case .landscapeLeft:
+                return .landscapeLeft
+            case .landscapeRight:
+                return .landscapeRight
+            default:
+                break
+            }
+        }
+
+        // Fallback to device orientation
+        switch UIDevice.current.orientation {
+        case .portrait:
+            return .portrait
+        case .portraitUpsideDown:
+            return .portraitUpsideDown
+        case .landscapeLeft:
+            return .landscapeRight // Note: inverted for front camera
+        case .landscapeRight:
+            return .landscapeLeft // Note: inverted for front camera
+        default:
+            return .portrait
+        }
     }
 
     // MARK: - Public Methods
@@ -272,12 +342,13 @@ final class WebRTCService: NSObject, ObservableObject {
     }
 
     private func setupLocalVideo() {
-        let videoSource = Self.factory.videoSource()
+        let source = Self.factory.videoSource()
+        self.videoSource = source
 
         #if targetEnvironment(simulator)
         // Use a test pattern for simulator
         #else
-        let capturer = RTCCameraVideoCapturer(delegate: videoSource)
+        let capturer = RTCCameraVideoCapturer(delegate: source)
         videoCapturer = capturer
 
         // Find the front camera
@@ -305,9 +376,14 @@ final class WebRTCService: NSObject, ObservableObject {
         let fps = min(format.videoSupportedFrameRateRanges.first?.maxFrameRate ?? 30, 30)
 
         capturer.startCapture(with: frontCamera, format: format, fps: Int(fps))
+
+        // Apply initial orientation after a brief delay to ensure UI is ready
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.updateVideoOrientation()
+        }
         #endif
 
-        let videoTrack = Self.factory.videoTrack(with: videoSource, trackId: "video0")
+        let videoTrack = Self.factory.videoTrack(with: source, trackId: "video0")
         peerConnection?.add(videoTrack, streamIds: ["stream0"])
         localVideoTrack = videoTrack
     }

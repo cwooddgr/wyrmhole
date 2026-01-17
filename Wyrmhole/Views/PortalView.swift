@@ -7,31 +7,37 @@ struct PortalView: View {
     @State private var controlsTimer: Timer?
 
     var body: some View {
-        ZStack {
-            // Remote video (full screen)
-            RemoteVideoView(webRTCService: connectionManager.webRTCService)
-                .ignoresSafeArea()
+        GeometryReader { geometry in
+            let isLandscape = geometry.size.width > geometry.size.height
+            let previewWidth: CGFloat = isLandscape ? 200 : 120
+            let previewHeight: CGFloat = isLandscape ? 150 : 160
 
-            // Local video (picture-in-picture style, small corner)
-            VStack {
-                HStack {
+            ZStack {
+                // Remote video (full screen)
+                RemoteVideoView(webRTCService: connectionManager.webRTCService)
+                    .ignoresSafeArea()
+
+                // Local video (picture-in-picture style, small corner)
+                VStack {
+                    HStack {
+                        Spacer()
+                        LocalVideoView(webRTCService: connectionManager.webRTCService)
+                            .frame(width: previewWidth, height: previewHeight)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+                            .shadow(radius: 10)
+                            .padding()
+                    }
                     Spacer()
-                    LocalVideoView(webRTCService: connectionManager.webRTCService)
-                        .frame(width: 150, height: 200)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                        )
-                        .shadow(radius: 10)
-                        .padding()
                 }
-                Spacer()
-            }
 
-            // Controls overlay
-            if showControls {
-                controlsOverlay
+                // Controls overlay
+                if showControls {
+                    controlsOverlay
+                }
             }
         }
         .persistentSystemOverlays(.hidden)
@@ -127,11 +133,16 @@ struct RemoteVideoView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         view.backgroundColor = .black
+        // Attach immediately when view is created
+        webRTCService?.attachRemoteVideoView(view)
         return view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        webRTCService?.attachRemoteVideoView(uiView)
+        // Only re-attach if not already attached (subview count check)
+        if uiView.subviews.isEmpty {
+            webRTCService?.attachRemoteVideoView(uiView)
+        }
     }
 }
 
@@ -141,11 +152,16 @@ struct LocalVideoView: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let view = UIView()
         view.backgroundColor = .darkGray
+        // Attach immediately when view is created
+        webRTCService?.attachLocalVideoView(view)
         return view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        webRTCService?.attachLocalVideoView(uiView)
+        // Only re-attach if not already attached (subview count check)
+        if uiView.subviews.isEmpty {
+            webRTCService?.attachLocalVideoView(uiView)
+        }
     }
 }
 
