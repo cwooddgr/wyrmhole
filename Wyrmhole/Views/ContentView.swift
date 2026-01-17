@@ -4,20 +4,44 @@ struct ContentView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
 
     var body: some View {
-        Group {
-            switch connectionManager.state {
-            case .disconnected, .browsing:
-                DiscoveryView()
-            case .connecting:
-                ConnectingView()
-            case .connected:
-                PortalView()
+        ZStack {
+            Group {
+                switch connectionManager.state {
+                case .disconnected, .browsing:
+                    DiscoveryView()
+                case .connecting:
+                    ConnectingView()
+                case .connected:
+                    PortalView()
+                }
+            }
+
+            // Toast message for remote disconnect
+            if connectionManager.remoteDisconnectReceived {
+                VStack {
+                    Spacer()
+                    Text("Wyrmhole closed")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(Color.black.opacity(0.8))
+                        )
+                        .padding(.bottom, 100)
+                }
+                .transition(.opacity)
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        withAnimation {
+                            connectionManager.remoteDisconnectReceived = false
+                        }
+                    }
+                }
             }
         }
         .preferredColorScheme(.dark)
-        .alert("Wyrmhole closed", isPresented: $connectionManager.remoteDisconnectReceived) {
-            Button("OK", role: .cancel) { }
-        }
         .onChange(of: connectionManager.state) { newState in
             // Start browsing/advertising when not connected, stop when connected
             if newState == .connected {

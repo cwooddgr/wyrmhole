@@ -69,7 +69,8 @@ struct PortalView: View {
                                 Capsule()
                                     .fill(Color.black.opacity(0.5))
                             )
-                            .padding(.bottom, 40)
+                            .padding(.bottom, showControls ? 120 : 40)
+                            .animation(.easeInOut(duration: 0.2), value: showControls)
                     }
                 }
             }
