@@ -120,7 +120,7 @@ final class ConnectionManager: ObservableObject {
         connectedPeer = peer
     }
 
-    /// Disconnect from the current peer (triggers closing animation first)
+    /// Disconnect from the current peer (triggers closing animation first if connected)
     func disconnect() {
         reconnectWorkItem?.cancel()
         reconnectWorkItem = nil
@@ -129,8 +129,14 @@ final class ConnectionManager: ObservableObject {
         // Notify the other peer of graceful disconnect before closing
         sendSignalingMessage(.disconnect)
 
-        // Trigger closing animation - completeDisconnect will be called when animation finishes
-        portalTransitionState = .closing
+        // If we're still connecting (not yet connected), skip the animation
+        // since PortalTransitionView isn't mounted yet
+        if state == .connecting {
+            completeDisconnect()
+        } else {
+            // Trigger closing animation - completeDisconnect will be called when animation finishes
+            portalTransitionState = .closing
+        }
     }
 
     /// Called by PortalTransitionView when closing animation completes
@@ -246,6 +252,10 @@ final class ConnectionManager: ObservableObject {
 
         case .cancelled:
             print("Signaling connection cancelled")
+            // Connection was cancelled (either by us or peer) - clean up
+            cleanupConnection()
+            state = .disconnected
+            connectedPeer = nil
 
         default:
             break
@@ -486,8 +496,13 @@ final class ConnectionManager: ObservableObject {
                 reconnectWorkItem = nil
                 reconnectAttempts = maxReconnectAttempts
                 remoteDisconnectReceived = true
-                // Trigger closing animation - completeDisconnect will be called when animation finishes
-                portalTransitionState = .closing
+                // If we're still connecting, skip animation since PortalTransitionView isn't mounted
+                if state == .connecting {
+                    completeDisconnect()
+                } else {
+                    // Trigger closing animation - completeDisconnect will be called when animation finishes
+                    portalTransitionState = .closing
+                }
             }
         } catch {
             print("Failed to decode signaling message: \(error)")
