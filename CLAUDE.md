@@ -20,6 +20,7 @@ xcodebuild -project Wyrmhole.xcodeproj -scheme Wyrmhole -destination 'generic/pl
 - **ConnectionManager.swift** - Orchestrates connection lifecycle, signaling protocol, reconnection logic
 - **BonjourService.swift** - Bonjour advertising/discovery using Network.framework
 - **WebRTCService.swift** - WebRTC peer connection, video/audio capture and streaming
+- **OrientationAwareCapturer.swift** - Custom video capturer using interface orientation (fixes iOS 16)
 - **Views/** - SwiftUI views (ContentView, DiscoveryView, PortalView)
 - **Views/Effects/** - Portal transition effect using CAEmitterLayer particles
 
@@ -58,8 +59,14 @@ Messages are length-prefixed JSON over TCP:
 
 ### Camera Orientation
 - Device orientation notifications must be started at app launch
-- Camera capture is restarted on orientation change to pick up correct orientation
-- A 0.5s delay restart is used on first launch to ensure correct initial orientation
+- Uses custom `OrientationAwareCapturer` instead of `RTCCameraVideoCapturer` to fix iOS 16 orientation issues
+- `OrientationAwareCapturer` uses `UIWindowScene.interfaceOrientation` instead of `UIDevice.current.orientation` (which is unreliable at app launch on iOS 16)
+
+### Connection Cancellation
+- Cancel during `.connecting` state must call `completeDisconnect()` directly (not trigger portal animation)
+- `PortalTransitionView` is only mounted in `.connected` state, so animation-based disconnect doesn't work during connection phase
+- When receiving `disconnect` message during `.connecting`, complete disconnect immediately
+- Handle `.cancelled` connection state to clean up when peer cancels
 
 ### Portal Transition Effect
 - Uses CAEmitterLayer with CADisplayLink for frame-by-frame animation (CABasicAnimation doesn't work for emitterSize)
