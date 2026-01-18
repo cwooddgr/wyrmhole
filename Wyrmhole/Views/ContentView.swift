@@ -12,7 +12,7 @@ struct ContentView: View {
                 case .connecting:
                     ConnectingView()
                 case .connected:
-                    PortalView()
+                    PortalTransitionView()
                 }
             }
 

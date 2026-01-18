@@ -2,6 +2,14 @@ import Foundation
 import Network
 import Combine
 
+/// Portal transition animation state
+enum PortalTransitionState: Equatable {
+    case closed
+    case opening
+    case open
+    case closing
+}
+
 /// Manages the overall connection lifecycle between two Wyrmhole devices
 @MainActor
 final class ConnectionManager: ObservableObject {
@@ -34,6 +42,7 @@ final class ConnectionManager: ObservableObject {
     @Published private(set) var signalStrength: Int = 3 // 0-3
     @Published var remoteDisconnectReceived = false
     @Published private(set) var isAudioMuted: Bool = false
+    @Published var portalTransitionState: PortalTransitionState = .closed
 
     // MARK: - Public Properties
 
@@ -111,7 +120,7 @@ final class ConnectionManager: ObservableObject {
         connectedPeer = peer
     }
 
-    /// Disconnect from the current peer
+    /// Disconnect from the current peer (triggers closing animation first)
     func disconnect() {
         reconnectWorkItem?.cancel()
         reconnectWorkItem = nil
@@ -120,9 +129,16 @@ final class ConnectionManager: ObservableObject {
         // Notify the other peer of graceful disconnect before closing
         sendSignalingMessage(.disconnect)
 
+        // Trigger closing animation - completeDisconnect will be called when animation finishes
+        portalTransitionState = .closing
+    }
+
+    /// Called by PortalTransitionView when closing animation completes
+    func completeDisconnect() {
         cleanupConnection()
         state = .disconnected
         connectedPeer = nil
+        portalTransitionState = .closed
     }
 
     /// Toggle microphone mute
@@ -469,10 +485,9 @@ final class ConnectionManager: ObservableObject {
                 reconnectWorkItem?.cancel()
                 reconnectWorkItem = nil
                 reconnectAttempts = maxReconnectAttempts
-                cleanupConnection()
-                state = .disconnected
-                connectedPeer = nil
                 remoteDisconnectReceived = true
+                // Trigger closing animation - completeDisconnect will be called when animation finishes
+                portalTransitionState = .closing
             }
         } catch {
             print("Failed to decode signaling message: \(error)")

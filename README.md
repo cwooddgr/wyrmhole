@@ -54,7 +54,10 @@ Wyrmhole/
 ├── Views/
 │   ├── ContentView.swift       # Root view / state router
 │   ├── DiscoveryView.swift     # Browse and advertise UI
-│   └── PortalView.swift        # Full-screen video portal
+│   ├── PortalView.swift        # Full-screen video portal
+│   └── Effects/
+│       ├── PortalEffectView.swift      # Particle emitter iris animation
+│       └── PortalTransitionView.swift  # Orchestrates open/close transitions
 └── Services/
     ├── BonjourService.swift    # Network discovery via Bonjour
     ├── WebRTCService.swift     # Video/audio streaming
@@ -67,6 +70,7 @@ Wyrmhole/
 - **Signaling**: WebRTC offer/answer and ICE candidates are exchanged over a direct TCP connection established via Bonjour. Connections use WiFi for reliability across iOS versions.
 - **Media**: WebRTC handles video/audio capture, encoding, and low-latency peer-to-peer streaming
 - **Reconnection**: Automatic reconnect with exponential backoff if the connection drops
+- **Portal Effect**: Animated iris transition with particle effects when connecting and disconnecting
 
 ## Permissions
 

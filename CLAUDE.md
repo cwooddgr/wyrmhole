@@ -21,6 +21,7 @@ xcodebuild -project Wyrmhole.xcodeproj -scheme Wyrmhole -destination 'generic/pl
 - **BonjourService.swift** - Bonjour advertising/discovery using Network.framework
 - **WebRTCService.swift** - WebRTC peer connection, video/audio capture and streaming
 - **Views/** - SwiftUI views (ContentView, DiscoveryView, PortalView)
+- **Views/Effects/** - Portal transition effect using CAEmitterLayer particles
 
 ## Key Technical Details
 
@@ -59,6 +60,13 @@ Messages are length-prefixed JSON over TCP:
 - Device orientation notifications must be started at app launch
 - Camera capture is restarted on orientation change to pick up correct orientation
 - A 0.5s delay restart is used on first launch to ensure correct initial orientation
+
+### Portal Transition Effect
+- Uses CAEmitterLayer with CADisplayLink for frame-by-frame animation (CABasicAnimation doesn't work for emitterSize)
+- Iris effect uses CAShapeLayer with `fillRule = .evenOdd` to create a circular hole in a black layer
+- Particle birth rate scales dynamically with radius to maintain edge coverage as circumference grows
+- Animation deferred until layoutSubviews provides valid bounds to ensure correct centering
+- ConnectionManager.portalTransitionState coordinates animation timing with disconnect flow
 
 ## Testing
 
