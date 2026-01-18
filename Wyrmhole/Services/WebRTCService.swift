@@ -58,7 +58,7 @@ final class WebRTCService: NSObject, ObservableObject {
     private var localAudioTrack: RTCAudioTrack?
     private var remoteVideoTrack: RTCVideoTrack?
 
-    private var videoCapturer: RTCCameraVideoCapturer?
+    private var videoCapturer: OrientationAwareCapturer?
     private var localVideoView: UIView?
     private var remoteVideoView: UIView?
     private var videoSource: RTCVideoSource?
@@ -88,40 +88,28 @@ final class WebRTCService: NSObject, ObservableObject {
     }
 
     @objc private func handleOrientationChange() {
-        // Update video orientation when device rotates
-        updateVideoOrientation()
-    }
-
-    private func updateVideoOrientation() {
-        // Restart capture to pick up new orientation
         restartCaptureIfNeeded()
     }
 
     private func restartCaptureIfNeeded() {
         guard let capturer = videoCapturer else { return }
 
-        // Find the front camera
-        guard let frontCamera = RTCCameraVideoCapturer.captureDevices().first(where: {
-            $0.position == .front
-        }) else { return }
+        guard let frontCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
+            return
+        }
 
-        // Find the format we were using
-        let formats = RTCCameraVideoCapturer.supportedFormats(for: frontCamera)
+        let formats = frontCamera.formats
         guard let format = formats.first(where: { format in
             let dimensions = CMVideoFormatDescriptionGetDimensions(format.formatDescription)
             return dimensions.width == 1280 && dimensions.height == 720
-        }) ?? formats.last else { return }
+        }) ?? formats.last else {
+            return
+        }
 
         let fps = min(format.videoSupportedFrameRateRanges.first?.maxFrameRate ?? 30, 30)
 
-        // Stop and restart capture to pick up current orientation
         capturer.stopCapture()
         capturer.startCapture(with: frontCamera, format: format, fps: Int(fps))
-    }
-
-    private func isScreenLandscape() -> Bool {
-        let bounds = UIScreen.main.bounds
-        return bounds.width > bounds.height
     }
 
     // MARK: - Public Methods
@@ -330,19 +318,18 @@ final class WebRTCService: NSObject, ObservableObject {
         #if targetEnvironment(simulator)
         // Use a test pattern for simulator
         #else
-        let capturer = RTCCameraVideoCapturer(delegate: source)
+        // Use custom capturer that uses interface orientation instead of device orientation
+        // This fixes iOS 16 where device orientation is unreliable at app launch
+        let capturer = OrientationAwareCapturer(delegate: source)
         videoCapturer = capturer
 
-        // Find the front camera
-        guard let frontCamera = RTCCameraVideoCapturer.captureDevices().first(where: {
-            $0.position == .front
-        }) else {
+        guard let frontCamera = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) else {
             print("No front camera found")
             return
         }
 
         // Find a suitable format (prefer 720p for balance of quality and performance)
-        let formats = RTCCameraVideoCapturer.supportedFormats(for: frontCamera)
+        let formats = frontCamera.formats
         let targetWidth: Int32 = 1280
         let targetHeight: Int32 = 720
 
@@ -354,16 +341,8 @@ final class WebRTCService: NSObject, ObservableObject {
             return
         }
 
-        // Target 30fps for good quality
         let fps = min(format.videoSupportedFrameRateRanges.first?.maxFrameRate ?? 30, 30)
-
         capturer.startCapture(with: frontCamera, format: format, fps: Int(fps))
-
-        // Restart capture after a delay to ensure correct orientation on first launch
-        // The device orientation system may not be fully initialized immediately
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.restartCaptureIfNeeded()
-        }
         #endif
 
         let videoTrack = Self.factory.videoTrack(with: source, trackId: "video0")

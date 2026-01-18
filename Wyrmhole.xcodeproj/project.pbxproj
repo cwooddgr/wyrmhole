@@ -17,6 +17,7 @@
 		BD498F364FC6173CEF827E4E /* PortalEffectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EABDC6D3402703A4DFFE022F /* PortalEffectView.swift */; };
 		D124CFFF3F7C0AF73F96B91D /* ConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C077F49DDA74192ED831DA /* ConnectionManager.swift */; };
 		D43435F1FC666DEE7B0A61D8 /* PortalTransitionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD85EBD2B32A9934C36AA88 /* PortalTransitionView.swift */; };
+		DA6BA92BCC4C60901C4B9F2B /* OrientationAwareCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B42CED887121BD2DD22F59D3 /* OrientationAwareCapturer.swift */; };
 		DFBA160CA6347B69C8A2E704 /* PortalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42DB811AC8460629442A0F4E /* PortalView.swift */; };
 		E7C14756118D82CA21AAA4A8 /* BonjourService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EDECF2CD11E8AB4F18F349D /* BonjourService.swift */; };
 /* End PBXBuildFile section */
@@ -32,6 +33,7 @@
 		81A3F2F7F9B91DE61A15A27D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		8DCE36BBA86928129CF15E0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A780BDEDF70ABE814F02F752 /* Wyrmhole.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Wyrmhole.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B42CED887121BD2DD22F59D3 /* OrientationAwareCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrientationAwareCapturer.swift; sourceTree = "<group>"; };
 		CFD85EBD2B32A9934C36AA88 /* PortalTransitionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalTransitionView.swift; sourceTree = "<group>"; };
 		EABDC6D3402703A4DFFE022F /* PortalEffectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortalEffectView.swift; sourceTree = "<group>"; };
 		F2F840A3FBA48F2E01F18160 /* Wyrmhole.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Wyrmhole.entitlements; sourceTree = "<group>"; };
@@ -99,6 +101,7 @@
 			children = (
 				5EDECF2CD11E8AB4F18F349D /* BonjourService.swift */,
 				35C077F49DDA74192ED831DA /* ConnectionManager.swift */,
+				B42CED887121BD2DD22F59D3 /* OrientationAwareCapturer.swift */,
 				268EDCCE26249DA8EA5AF481 /* WebRTCService.swift */,
 			);
 			path = Services;
@@ -196,6 +199,7 @@
 				D124CFFF3F7C0AF73F96B91D /* ConnectionManager.swift in Sources */,
 				B8795D58D3028BF624D77E59 /* ContentView.swift in Sources */,
 				7A85BC99350537BCEB4BBB1D /* DiscoveryView.swift in Sources */,
+				DA6BA92BCC4C60901C4B9F2B /* OrientationAwareCapturer.swift in Sources */,
 				8A91B8777E44A9182BACC491 /* Peer.swift in Sources */,
 				BD498F364FC6173CEF827E4E /* PortalEffectView.swift in Sources */,
 				D43435F1FC666DEE7B0A61D8 /* PortalTransitionView.swift in Sources */,
